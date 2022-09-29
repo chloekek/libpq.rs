@@ -7,12 +7,3 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/sanpii/libpq.rs"
 links = "pq"
 edition = "2021"
-
-[build-dependencies]
-bindgen = "0.60"
-
-[target.'cfg(not(target_env = "msvc"))'.build-dependencies]
-pkg-config = "0.3.0"
-
-[target.'cfg(target_env = "msvc")'.build-dependencies]
-vcpkg = "0.2"

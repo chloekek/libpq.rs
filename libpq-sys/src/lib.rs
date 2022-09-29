@@ -6,6 +6,11 @@
 
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
+#[link(name = "pq")]
+extern
+{
+}
+
 #[cfg(test)]
 mod test {
     #[test]
