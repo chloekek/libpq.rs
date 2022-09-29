@@ -8,8 +8,6 @@ impl Connection {
      * See [PQexec](https://www.postgresql.org/docs/current/libpq-exec.html#LIBPQ-PQEXEC).
      */
     pub fn exec(&self, query: &str) -> crate::Result {
-        log::trace!("Execute query '{}'", query);
-
         let c_query = crate::ffi::to_cstr(query);
         unsafe { pq_sys::PQexec(self.into(), c_query.as_ptr()) }.into()
     }
@@ -29,8 +27,6 @@ impl Connection {
         result_format: crate::Format,
     ) -> crate::Result {
         let (values, formats, lengths) = Self::transform_params(param_values, param_formats);
-
-        Self::trace_query("Sending", command, param_types, param_values, param_formats);
 
         let c_command = crate::ffi::to_cstr(command);
 
@@ -72,9 +68,6 @@ impl Connection {
         query: &str,
         param_types: &[crate::Oid],
     ) -> crate::Result {
-        let prefix = format!("Prepare {}", name.unwrap_or("anonymous"));
-        Self::trace_query(&prefix, query, param_types, &[], &[]);
-
         let c_name = crate::ffi::to_cstr(name.unwrap_or_default());
         let c_query = crate::ffi::to_cstr(query);
 
@@ -103,9 +96,6 @@ impl Connection {
         param_formats: &[crate::Format],
         result_format: crate::Format,
     ) -> crate::Result {
-        let prefix = format!("Execute {} prepared query", name.unwrap_or("anonymous"));
-        Self::trace_query(&prefix, "", &[], param_values, param_formats);
-
         let (values, formats, lengths) = Self::transform_params(param_values, param_formats);
 
         let c_name = crate::ffi::to_cstr(name.unwrap_or_default());

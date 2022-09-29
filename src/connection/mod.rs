@@ -110,48 +110,6 @@ impl Connection {
         (values, formats, lengths)
     }
 
-    fn trace_query(
-        prefix: &str,
-        command: &str,
-        param_types: &[crate::Oid],
-        param_values: &[Option<Vec<u8>>],
-        param_formats: &[crate::Format],
-    ) {
-        use std::fmt::Write;
-
-        if log::log_enabled!(log::Level::Trace) {
-            let mut msg = prefix.to_string();
-
-            let mut p = Vec::new();
-
-            for (x, value) in param_values.iter().enumerate() {
-                let v = if let Some(s) = value {
-                    match param_formats.get(x) {
-                        Some(crate::Format::Binary) => format!("{:?}", s),
-                        _ => String::from_utf8(s.to_vec()).unwrap_or_else(|_| "�".to_string()),
-                    }
-                } else {
-                    "null".to_string()
-                };
-                let default_type = crate::types::UNKNOWN;
-                let t = crate::Type::try_from(*param_types.get(x).unwrap_or(&default_type.oid))
-                    .unwrap_or(default_type);
-
-                p.push(format!("'{}'::{}", v, t.name));
-            }
-
-            if !command.is_empty() {
-                write!(msg, " query '{command}'").ok();
-            }
-
-            if !p.is_empty() {
-                write!(msg, " with params [{}]", p.join(", ")).ok();
-            }
-
-            log::trace!("{}", msg);
-        }
-    }
-
     pub(crate) fn error<T>(&self) -> crate::errors::Result<T> {
         Err(self
             .error_message()

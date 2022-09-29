@@ -8,8 +8,6 @@ impl Connection {
     pub fn trace(&self, file: std::fs::File) {
         use std::os::unix::io::IntoRawFd;
 
-        log::trace!("Enable trace");
-
         let c_mode = crate::ffi::to_cstr("w");
 
         unsafe {
@@ -25,8 +23,6 @@ impl Connection {
      */
     #[cfg(unix)]
     pub fn untrace(&self) {
-        log::trace!("Disable trace");
-
         unsafe {
             pq_sys::PQuntrace(self.into());
         }

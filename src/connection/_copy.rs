@@ -10,8 +10,6 @@ impl Connection {
      * [PQputCopyData](https://www.postgresql.org/docs/current/libpq-copy.html#LIBPQ-PQPUTCOPYDATA).
      */
     pub fn put_copy_data(&self, buffer: &[u8]) -> crate::errors::Result {
-        log::trace!("Sending copy data");
-
         let success = unsafe {
             pq_sys::PQputCopyData(
                 self.into(),
@@ -35,8 +33,6 @@ impl Connection {
      * [PQputCopyEnd](https://www.postgresql.org/docs/current/libpq-copy.html#LIBPQ-PQPUTCOPYEND).
      */
     pub fn put_copy_end(&self, errormsg: Option<&str>) -> crate::errors::Result {
-        log::trace!("End of copy");
-
         let cstr = errormsg.map(crate::ffi::to_cstr);
         let ptr = if let Some(ref cstr) = cstr {
             cstr.as_ptr()

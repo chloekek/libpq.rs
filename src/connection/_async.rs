@@ -9,8 +9,6 @@ impl Connection {
      * [PQsendQuery](https://www.postgresql.org/docs/current/libpq-async.html#LIBPQ-PQSENDQUERY).
      */
     pub fn send_query(&self, command: &str) -> crate::errors::Result {
-        log::trace!("Sending query '{}'", command);
-
         let c_command = crate::ffi::to_cstr(command);
 
         let success = unsafe { pq_sys::PQsendQuery(self.into(), c_command.as_ptr()) };
@@ -37,8 +35,6 @@ impl Connection {
         result_format: crate::Format,
     ) -> crate::errors::Result {
         let (values, formats, lengths) = Self::transform_params(param_values, param_formats);
-
-        Self::trace_query("Sending", command, param_types, param_values, param_formats);
 
         let c_command = crate::ffi::to_cstr(command);
 
@@ -87,9 +83,6 @@ impl Connection {
         query: &str,
         param_types: &[crate::Oid],
     ) -> crate::errors::Result {
-        let prefix = format!("Sending prepare {}", name.unwrap_or("anonymous"));
-        Self::trace_query(&prefix, query, param_types, &[], &[]);
-
         let c_name = crate::ffi::to_cstr(name.unwrap_or_default());
         let c_query = crate::ffi::to_cstr(query);
 
@@ -122,9 +115,6 @@ impl Connection {
         param_formats: &[crate::Format],
         result_format: crate::Format,
     ) -> crate::errors::Result {
-        let prefix = format!("Send {} prepared query", name.unwrap_or("anonymous"));
-        Self::trace_query(&prefix, "", &[], param_values, param_formats);
-
         let (values, formats, lengths) = Self::transform_params(param_values, param_formats);
 
         let c_name = crate::ffi::to_cstr(name.unwrap_or_default());
@@ -162,11 +152,6 @@ impl Connection {
      * See [PQsendDescribePortal](https://www.postgresql.org/docs/current/libpq-async.html#LIBPQ-PQSENDDESCRIBEPORTAL).
      */
     pub fn send_describe_prepared(&self, name: Option<&str>) -> crate::errors::Result {
-        log::trace!(
-            "Sending describe prepared query {}",
-            name.unwrap_or("anonymous")
-        );
-
         let c_name = crate::ffi::to_cstr(name.unwrap_or_default());
 
         let success = unsafe { pq_sys::PQsendDescribePrepared(self.into(), c_name.as_ptr()) };
@@ -185,8 +170,6 @@ impl Connection {
      * [PQsendDescribePortal](https://www.postgresql.org/docs/current/libpq-async.html#LIBPQ-PQSENDDESCRIBEPORTAL).
      */
     pub fn send_describe_portal(&self, name: Option<&str>) -> crate::errors::Result {
-        log::trace!("Sending describe portal {}", name.unwrap_or("anonymous"));
-
         let c_name = crate::ffi::to_cstr(name.unwrap_or_default());
 
         let success = unsafe { pq_sys::PQsendDescribePortal(self.into(), c_name.as_ptr()) };
@@ -220,8 +203,6 @@ impl Connection {
      * [PQconsumeInput](https://www.postgresql.org/docs/current/libpq-async.html#LIBPQ-PQCONSUMEINPUT).
      */
     pub fn consume_input(&self) -> crate::errors::Result {
-        log::trace!("Consume input");
-
         let success = unsafe { pq_sys::PQconsumeInput(self.into()) };
 
         if success == 1 {
@@ -247,12 +228,6 @@ impl Connection {
      * [PQsetnonblocking](https://www.postgresql.org/docs/current/libpq-async.html#LIBPQ-PQSETNONBLOCKING).
      */
     pub fn set_non_blocking(&self, non_blocking: bool) -> crate::errors::Result {
-        if non_blocking {
-            log::trace!("Set non blocking");
-        } else {
-            log::trace!("Set blocking");
-        }
-
         let status = unsafe { pq_sys::PQsetnonblocking(self.into(), non_blocking as i32) };
 
         if status < 0 {
@@ -278,8 +253,6 @@ impl Connection {
      * See [PQflush](https://www.postgresql.org/docs/current/libpq-async.html#LIBPQ-PQFLUSH).
      */
     pub fn flush(&self) -> crate::errors::Result {
-        log::trace!("Flush");
-
         let status = unsafe { pq_sys::PQflush(self.into()) };
 
         if status == 0 {
